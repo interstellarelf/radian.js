@@ -1,0 +1,39 @@
+{
+  "name": "radian-animator",
+  "version": "0.1.0",
+  "description": "Control animations as pure data with this js-animator.",
+  "main": "index.jus",
+  "scripts": {
+    "test": "NONE"
+  },
+  "repository": {
+    "type": "git",
+    "url": "NONE"
+  },
+  "keywords": [
+    "js",
+    "animations",
+    "sprites",
+    "object",
+    "object3d",
+    "game-object"
+  ],
+  "author": "Jordan E. Blake",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "jest": "^26.4.2",
+    "uuidv4": "^6.2.3",
+    "babel-cli": "^6.24.0",
+    "babel-preset-es2015": "^6.24.0",
+    "concat": "^1.0.3",
+    "grunt": "^1.3.0",
+    "grunt-babel": "^6.0.0",
+    "grunt-contrib-concat": "^1.0.1",
+    "grunt-contrib-jshint": "^2.1.0",
+    "grunt-contrib-uglify": "^1.0.1",
+    "grunt-contrib-watch": "^1.1.0",
+    "grunt-init": "latest",
+    "jshint": "^2.12.0",
+    "load-grunt-tasks": "^3.5.2"
+  }
+}

@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Gamelab.Template:Dragon</title>
+    <script src="../dist/gamelab/gamelab.js"></script>
+    <script src="../res/libraries/three.js"></script>
+    <link rel="stylesheet" href="../res/styles/gamelab-example.css">
+    <style>
+
+      div#container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        width: 100%;
+        height: 100%;
+        background: #777;
+      }
+      body {
+        background: black;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <img src="../res/images/gamelab-logo.png" alt="" id="logo">
+      <span class="title">Dragon-Template-Demo</span>
+    </header>
+
+    <script>
+
+      var gameWindow = new Gamelab.GameWindow();
+
+      var V = Gamelab.Vector;
+
+      function dragonPreheadOne(w, h, totalLen) {
+
+        var segment = new Gamelab.Sprite('./res/dragons/water-dragon/pre-head-segment.png');
+        segment.Size(w, h);
+
+        return segment;
+      };
+
+      function dragonBodyOne(index, totalLen, linePoints) {
+
+        var segment = new Gamelab.Sprite('./res/dragons/water-dragon/neck-segment-01.png');
+        segment.Size(80, 80);
+
+        let ix = index * 32 + 58;
+
+        if(ix > linePoints.length - 1)
+        {
+          ix = linePoints.length - 1
+        }
+
+        segment.Position(linePoints[ix].sub(44, 44));
+        return segment;
+      };
+
+      function dragonBodyTwo(index, totalLen, linePoints) {
+
+        var segment = new Gamelab.Sprite('./res/dragons/water-dragon/neck-segment-02.png');
+        segment.Size(120, 120);
+
+
+        let ix = index * 33 + 55;
+
+        if(ix > linePoints.length - 1)
+        {
+          ix = linePoints.length - 1
+        }
+
+        console.info(linePoints[ix])
+
+        segment.Rotation(linePoints[ix].r - 60);
+
+        segment.Position(linePoints[ix].sub(60, 60));
+        return segment;
+      };
+
+
+      function assembleDragonBody(length, linePoints, gameWindow){
+
+          if(length % 2 == 0)
+          {
+              return console.error('1st arg: length --must be an odd number');
+          }
+
+          var dragonNeck = [];
+
+          var totalLen = 0;
+
+          for (var x = 0; x < length; x++) {
+            if (x % 2 == 1) {
+
+              var piece = dragonBodyOne(x, totalLen, linePoints);
+              piece.size.x *= (1.0 - (x * 0.03));
+              piece.size.y *= (1.0 - (x * 0.03));
+              dragonNeck.push(piece);
+
+              totalLen += 20;
+            }
+            if (x % 2 == 0) {
+
+              var piece = dragonBodyTwo(x, totalLen, linePoints);
+              piece.size.x *= (1.0 - (x * 0.03));
+              piece.size.y *= (1.0 - (x * 0.03));
+              dragonNeck.push(piece);
+
+              totalLen += 60;
+            }
+          }
+
+          dragonNeck.forEach(function (seg) {
+            gameWindow.add(seg);
+          });
+
+          return dragonNeck;
+      }
+
+      function assembleDragonPrehead(length, linePoints, gameWindow){
+
+          var dragonPrehead = [];
+
+          var totalLen = 0;
+
+          for (var q = 0; q < length; q++) {
+            var x = 310, y = 140, w = 60, h = 60;
+            var preheadPiece = dragonPreheadOne(w, h).Layer(-100)
+            preheadPiece.Position(linePoints[q * 35].sub(40, 36));
+            dragonPrehead.push(preheadPiece);
+          }
+
+
+          dragonPrehead.forEach(function (seg) {
+            gameWindow.add(seg);
+          });
+
+          return dragonPrehead;
+      }
+
+      function assembleDragonHead (linePoints, gameWindow){
+        var dragonHeadTop =  new Gamelab.Sprite('./res/dragons/water-dragon/head-top.png');
+        dragonHeadTop.Size(130, 130);
+        dragonHeadTop.Layer(10);
+        var dragonHeadJaw = new Gamelab.Sprite('./res/dragons/water-dragon/jaw.png');
+        dragonHeadJaw.Size(90, 90);
+
+        var headOffset = new V(-120, -80),
+        jawOffset = new V(-90, -45);
+
+        dragonHeadTop.Position(headOffset.x + linePoints[0].x, headOffset.y + linePoints[0].y);
+        dragonHeadJaw.Position(jawOffset.x + linePoints[0].x, jawOffset.y + linePoints[0].y);
+
+        dragonHeadJaw.Origin(dragonHeadJaw.size.x /  2.0, dragonHeadJaw.size.y / 2.0);
+
+        dragonHeadJaw.Rotation(20);
+
+        gameWindow.add(dragonHeadTop);
+        gameWindow.add(dragonHeadJaw);
+        return new Array().concat([dragonHeadTop, dragonHeadJaw]);
+      };
+
+
+      function assembleArm(offset, rotation, layer){
+          var dragonArmTop =  new Gamelab.Sprite('./res/dragons/water-dragon/elongated-circle.png');
+
+          var offset = offset || new V(600, 220);
+
+          rotation = rotation || 0;
+          layer = layer || 0;
+
+          dragonArmTop.Origin(20, 10);
+          dragonArmTop.Position(offset.x, offset.y);
+
+          var dragonArmBottom =  new Gamelab.Sprite('./res/dragons/water-dragon/elongated-circle.png');
+
+
+
+          dragonArmBottom.Origin(20, 10);
+          dragonArmBottom.Position(offset.x, offset.y + 30).Rotation(30);
+
+          var dragonClaw = new Gamelab.Sprite('./res/dragons/water-dragon/dragon-claw.png').Scale(0.25);
+
+          dragonClaw.onLoad(function(){
+
+                      this.Origin(40, 0);
+                      this.Rotation(28);
+                      this.Position(offset.x - 40, offset.y + 94);
+
+          });
+
+
+          dragonArmTop.Layer(layer);
+          dragonArmBottom.Layer(layer);
+          dragonClaw.Layer(layer);
+
+          gameWindow.add(dragonArmTop);
+          gameWindow.add(dragonArmBottom);
+
+          gameWindow.add(dragonClaw);
+
+
+      };
+
+      function assembleTail(){
+        //alert('assembling Tail');
+        for(var x = 0; x < 5; x++)
+        {
+
+          var dragonTailPiece =  new Gamelab.Sprite('./res/dragons/water-dragon/tail-01.png').Scale(1.0 - (x * 0.1));
+          dragonTailPiece.Origin((40 * dragonTailPiece.scale) / 2.0, (38 * dragonTailPiece.scale) / 2.0);
+          dragonTailPiece.Position(830 + x * 14, 360 - x * 10);
+
+          dragonTailPiece.onLoad(function(){
+            this.position.x -= this.size.x / 4.0;
+          });
+
+          dragonTailPiece.Layer(100);
+          gameWindow.add(dragonTailPiece);
+        }
+      };
+
+
+      function CreateQuadLine(gameWindow) {
+        var line =new Gamelab.Line2D().Color('aqua').StepFunction(Gamelab.Curves.InOut.Quadratic).Size(300, 200);
+        line.Position(580, 200);
+        line.Fill();
+        gameWindow.add(line);
+        return line;
+      };
+
+
+
+
+
+      //I want to load from resource file and animate very easily:::
+      Gamelab.ready(function () {
+
+        var quadLine = CreateQuadLine(gameWindow);
+        var dragonNeck = assembleDragonBody(7,  quadLine.points, gameWindow);
+        var dragonPrehead = assembleDragonPrehead(2, quadLine.points, gameWindow);
+        var dragonHead = assembleDragonHead(quadLine.points, gameWindow);
+        assembleArm(new V(600, 210));
+        assembleArm(new V(630, 206), 0, -200);
+        assembleTail();
+        gameWindow.start();
+
+      });
+    </script>
+
+  </body>
+
+</html>

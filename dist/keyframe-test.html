@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Gamelab.Keyframe-Test</title>
+    <script src="./res/libraries/gamelab.js"></script>
+    <script src="./radian/radian.js"></script>
+    <script src="./res/libraries/three.js"></script>
+    <script src="./res/libraries/canvas-spliner.js"></script>
+    <link rel="stylesheet" href="./res/styles/gamelab-example.css">
+    <style>
+
+      div#container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        width: 100%;
+        height: 100%;
+        background: #777;
+      }
+      body {
+        background: black;
+      }
+      .hidden-div {
+        position:fixed;
+        visibility: visible;
+        z-index: -100;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <img src="../res/images/gamelab-logo.png" alt="" id="logo">
+      <span class="title">Keyframe-Test</span>
+    </header>
+
+    <div class="hidden-div spliner-canvas" id="spliner-canvas-0"></div>
+    <div class="hidden-div spliner-canvas" id="spliner-canvas-1"></div>
+    <div class="hidden-div spliner-canvas" id="spliner-canvas-2"></div>
+
+    <script>
+
+      var gameWindow = new Gamelab.GameWindow();
+
+      var Vector = Gamelab.Vector,
+        V = Gamelab.Vector;
+
+      var cogSprite = new Gamelab.Sprite('./res/textures/cog.png').Scale(0.5);
+
+      cogSprite.onUpdate(function () {
+        //  this.rotation.x += 2.0;
+      });
+
+      var keyframes;
+
+      var stepPoints = [];
+
+      for (var x = 0; x < 1.0; x += 0.001) {
+        stepPoints.push(x);
+      }
+
+      function dreamCall() {
+
+        keyframes = Radian.CreateFrameSequence(function () {
+
+          console.info(this);
+
+          this.add(new Keyframe().Object(cogSprite).Target({
+            position: new Vector(200, 400),
+            rotation: new Vector(50, 0)
+          }).Curve('smooth-interpolate').Within(400));
+
+          this.add(new Keyframe().Object(cogSprite).Target({
+            rotation: new Vector(150, 0, 0),
+            position: new Vector(500, 400)
+          }).Curve('smooth-interpolate').Within(700));
+
+          this.add(new Keyframe().Object(cogSprite).Target({
+            position: new Vector(200, 400),
+            rotation: new Vector(250, 0)
+          }).Curve('smooth-interpolate').Within(400));
+
+          this.add(new Keyframe().Object(cogSprite).Target({
+            rotation: new Vector(50, 0, 0),
+            position: new Vector(500, 400)
+          }).Curve('smooth-interpolate').Within(700));
+
+          this.add(new Keyframe().Target({
+            position: new Vector(200, 400),
+            rotation: new Vector(150, 0)
+          }).Curve('smooth-interpolate').Within(400));
+
+          this.add(new Keyframe().Object(cogSprite).Target({
+            rotation: new Vector(50, 0, 0),
+            position: new Vector(500, 400)
+          }).Curve('smooth-interpolate').Within(700));
+
+          this.add(new Keyframe().Object(cogSprite).Target({
+            position: new Vector(200, 400),
+            rotation: new Vector(150, 0)
+          }).Curve('smooth-interpolate').Within(400));
+
+          console.info(this);
+        });
+
+      };
+
+      function iterateThroughTime(call, millis) {
+        setInterval(call, millis);
+      };
+
+      function DataTarget(x, y) {
+        return {
+          target: {
+            x,
+            y
+          }
+        }
+      };
+
+      var targetProperties = {
+          rotation:'x',
+          position:['x', 'y']
+      };
+
+      let animationStacks = [stepPoints.slice(0), stepPoints.slice(0), stepPoints.slice(0), stepPoints.slice(0)];
+
+      function applyAnimationModule(animationIndex, object, objectPropertyKey, key, keyframes, maxValue){
+
+        new Gamelab.Module().load('./res/libraries/spliner-animation-flow.module.js', function ($Module) {
+
+          $Module.createModel({showCanvas: true, id:'spliner-canvas-' + animationIndex});
+
+          console.info(keyframes);
+          var frames = keyframes.frames;
+
+          for (var x = 0; x < frames.length; x++) {
+            console.log('processing frame');
+            var target = frames[x].target;
+            $Module.addFrame(target[objectPropertyKey], key, frames.length - 1, x, maxValue);
+          }
+
+          $Module.draw();
+          console.info($Module);
+
+          iterateThroughTime(
+            function () {
+
+              if(!animationStacks[index].length)
+              {
+                console.log('early return');
+                return;
+              }
+
+              var floatPointX = animationStacks[index].pop();
+              console.log('processing point:' + floatPointX);
+
+              var floatPointY = $Module.getY(floatPointX);
+              console.log(floatPointY);
+              object[objectPropertyKey][key] = floatPointY * maxValue;
+            }, 10);
+        });
+      };
+
+      var index = 0;
+
+      //I want to load from resource file and animate very easily:::
+      Gamelab.ready(function () {
+
+        gameWindow.add(cogSprite);
+
+        dreamCall();
+
+        setTimeout(function(){
+          for(var x in targetProperties)
+          {
+            if(x == 'rotation')
+            {
+              //apply rotation.x
+              applyAnimationModule(index, cogSprite, 'rotation', 'x', keyframes, 360);
+              index += 1;
+            }
+
+            if(x == 'position')
+            {
+              //apply position.x, y, and z
+              var keys = targetProperties.position;
+
+              keys.forEach(function($key){
+                  applyAnimationModule(index, cogSprite, 'position', $key, keyframes, 500);
+                  index += 1;
+              });
+            }
+          }
+        }, 2000);
+
+        gameWindow.start();
+
+      });
+    </script>
+
+  </body>
+
+</html>
